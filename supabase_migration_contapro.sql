@@ -8,6 +8,9 @@ create table if not exists public.contapro_companies (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   tax_id text,
+  address text,
+  phone text,
+  email text,
   status text not null default 'Activo',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -77,6 +80,10 @@ create table if not exists public.contapro_audit_log (
   detail jsonb,
   created_at timestamptz not null default now()
 );
+
+-- Campos de estado para poder archivar registros sin destruir historial.
+alter table public.contapro_clients add column if not exists status text not null default 'Activo';
+alter table public.contapro_suppliers add column if not exists status text not null default 'Activo';
 
 create index if not exists idx_contapro_clients_company on public.contapro_clients(company_id);
 create index if not exists idx_contapro_suppliers_company on public.contapro_suppliers(company_id);

@@ -31,3 +31,20 @@ ARCHIVOS
 - supabase_migration_contapro.sql
 
 La migración agrega tablas nuevas y políticas. No reinicia ni borra la información de public.orders.
+
+
+REVISIÓN 2026-09-10
+- Empresas: alta, edición, búsqueda y archivado como Inactivo.
+- Ventas y compras: formularios persistentes.
+- Contabilidad: libro diario automático desde ventas/compras.
+- Reportes: resumen automático, impresión/PDF del navegador y CSV.
+- Tributario: resumen informativo de IGV.
+- SUNAT: comprobación de conexión Supabase y preparación para backend seguro.
+- Se conserva la base anterior; no se ejecuta DROP ni TRUNCATE.
+
+ACTUALIZACIÓN FINAL
+- Menús operativos: Inicio, Empresas, Clientes, Proveedores, Ventas, Compras, Contabilidad, Reportes, Tributario, SUNAT y SuperAdmin.
+- Reportes con período desde/hasta, impresión/PDF y CSV.
+- Ventas y compras alimentan automáticamente indicadores, contabilidad y reportes.
+- Registros dados de baja se archivan/anulan para conservar historial.
+- SUNAT se mantiene sin cambios.
