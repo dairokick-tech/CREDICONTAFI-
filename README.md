@@ -1,20 +1,21 @@
-# ContaPro Online
+# ContaPro Online — guardado de registros
 
-Sistema 100% online con backend propio Express y almacenamiento persistente en `data/contapro.json`. No usa Supabase.
+Versión sin Supabase. Usa un servidor Node.js propio y guarda los registros de forma persistente en `data/contapro.json`.
 
-## Inicio
-`npm install`
-`npm start`
+## Importante
+GitHub Pages solo sirve archivos estáticos y no ejecuta `server.js`. Para que Guardar funcione de verdad, este proyecto debe ejecutarse en un hosting que soporte Node.js y almacenamiento persistente.
 
-Abrir `http://localhost:3000` para probarlo. En producción se despliega el mismo proyecto en un servidor Node con almacenamiento persistente.
+## Ejecutar
+1. Instala Node.js 18+.
+2. Ejecuta `npm start`.
+3. Abre `http://localhost:3000`.
+4. Usuario inicial: `admin@contapro.local`
+5. Contraseña inicial: `ContaPro-Admin-2026`
 
-## Primer acceso
-`admin@contapro.local` / `ContaPro-Admin-2026`
+## Verificar almacenamiento
+Abre `/api/health` en el mismo servidor. Debe responder `ok: true` y `storage: "file"`.
 
-El SuperAdmin puede registrar empresas. Luego selecciona una empresa para registrar clientes, proveedores, ventas y compras. Los registros se guardan en el servidor.
+Los registros se guardan en `data/contapro.json`. No hay endpoint de eliminación física; las bajas se manejan como Inactivo/Anulada para conservar historial.
 
-## Conservación
-No hay endpoint de eliminación. Empresas se archivan y los demás registros se anulan para conservar historial.
-
-## Nota
-El módulo SUNAT queda conservado. La emisión electrónica real ante SUNAT requiere la integración tributaria correspondiente y credenciales/certificados del contribuyente.
+## Producción
+Usa un servicio Node/VPS con disco persistente. No uses GitHub Pages para el backend.
