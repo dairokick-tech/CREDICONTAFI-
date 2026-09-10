@@ -13,12 +13,55 @@ function localLoad(){try{return JSON.parse(localStorage.getItem(localKey))||{};}
 function localSave(){localStorage.setItem(localKey,JSON.stringify({companies:state.companies,clients:state.clients,suppliers:state.suppliers,sales:state.sales,purchases:state.purchases}));}
 function toast(t){let x=$('#toast');if(!x){x=document.createElement('div');x.id='toast';document.body.appendChild(x)}x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2600)}
 function go(s){state.section=s;render()}; window.go=go;
-async function boot(){if(!sb){Object.assign(state,localLoad());state.user={email:'Administrador local'};state.companyId=state.companies?.[0]?.id||null;return render()}const {data:{session}}=await sb.auth.getSession();if(!session)return renderLogin();state.user=session.user;await loadProfile();await loadAll();render();sb.auth.onAuthStateChange((_e,s)=>{state.user=s?.user||null;if(!state.user)renderLogin()})}
+async function boot(){
+  if(location.search.includes('local=1')) return enterLocalMode();
+  if(!sb){return enterLocalMode()}
+  try{
+    const {data:{session},error}=await sb.auth.getSession();
+    if(error) throw error;
+    if(!session) return renderLogin();
+    state.user=session.user;
+    await loadProfile();
+    await loadAll();
+    render();
+    sb.auth.onAuthStateChange((_e,s)=>{state.user=s?.user||null;if(!state.user)renderLogin()})
+  }catch(err){
+    renderLogin('No se pudo conectar con Supabase. Puedes reintentar o entrar en modo local para seguir trabajando en este dispositivo.');
+  }
+}
+function enterLocalMode(){
+  Object.assign(state,localLoad());
+  state.user={email:'Administrador local',id:'local-admin'};
+  state.profile={id:'local-admin',role:'superadmin'};
+  state.companyId=state.companies?.[0]?.id||null;
+  render();
+  toast('Modo local activado. Los datos se guardan en este dispositivo.');
+}
 async function loadProfile(){const r=await sb.from('contapro_profiles').select('*').eq('id',state.user.id).maybeSingle();state.profile=r.data||{id:state.user.id,role:'user'};state.companyId=state.profile.company_id||null}
 async function loadAll(){const [a,b,c,d,e]=await Promise.all(['contapro_companies','contapro_clients','contapro_suppliers','contapro_sales','contapro_purchases'].map(t=>sb.from(t).select('*').order('created_at',{ascending:false})));state.companies=a.data||[];state.clients=b.data||[];state.suppliers=c.data||[];state.sales=d.data||[];state.purchases=e.data||[];if(!state.companyId)state.companyId=state.companies[0]?.id||null;if(a.error||b.error||c.error||d.error||e.error)toast('Revisa las tablas y permisos de Supabase.')}
-function renderLogin(){$('#app').innerHTML=`<main class="login"><section class="login-card"><div class="brand">Conta<span>Pro</span></div><p class="muted">Gestión contable y empresarial multiempresa</p><form id="lf"><label>Correo<input id="email" type="email" required></label><label>Contraseña<input id="password" type="password" required></label><button class="primary wide">Ingresar</button></form><button id="signup" class="ghost wide">Crear usuario</button><div id="msg" class="notice"></div></section></main>`;$('#lf').onsubmit=login;$('#signup').onclick=signup}
-async function login(e){e.preventDefault();if(!sb){state.user={email:$('#email').value};return render()}const {error}=await sb.auth.signInWithPassword({email:$('#email').value,password:$('#password').value});if(error)return $('#msg').textContent=error.message;state.user=(await sb.auth.getUser()).data.user;await loadProfile();await loadAll();render()}
-async function signup(){if(!sb)return toast('Modo local activo.');const email=$('#email').value,p=$('#password').value;if(!email||p.length<6)return $('#msg').textContent='Usa un correo y una contraseña de mínimo 6 caracteres.';const {error}=await sb.auth.signUp({email,password:p});$('#msg').textContent=error?error.message:'Usuario creado. Confirma el correo si está habilitada la confirmación.'}
+function renderLogin(message=''){$('#app').innerHTML=`<main class="login"><section class="login-card"><div class="brand">Conta<span>Pro</span></div><p class="muted">Sistema propio de gestión y control empresarial</p><form id="lf"><label>Correo<input id="email" type="email" autocomplete="email" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button class="primary wide" type="submit">Ingresar</button></form><button id="signup" class="ghost wide">Crear usuario</button><button id="local" class="ghost wide">Entrar en modo local</button><div id="msg" class="notice">${esc(message)}</div><small class="muted">El modo local permite continuar sin conexión; los datos quedan en este dispositivo.</small></section></main>`;$('#lf').onsubmit=login;$('#signup').onclick=signup;$('#local').onclick=enterLocalMode}
+async function login(e){
+  e.preventDefault();
+  if(!sb){return enterLocalMode()}
+  const msg=$('#msg'); msg.textContent='Conectando...';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value,password:$('#password').value});
+    if(error){msg.textContent=error.message;return}
+    state.user=data.user;
+    await loadProfile();
+    await loadAll();
+    render();
+  }catch(err){
+    msg.innerHTML='No se pudo conectar con el servidor. Revisa tu conexión y la configuración de Supabase. <b>También puedes usar “Entrar en modo local”.</b>';
+  }
+}
+async function signup(){
+  if(!sb)return enterLocalMode();
+  const email=$('#email').value,p=$('#password').value;
+  if(!email||p.length<6)return $('#msg').textContent='Usa un correo y una contraseña de mínimo 6 caracteres.';
+  try{const {error}=await sb.auth.signUp({email,password:p});$('#msg').textContent=error?error.message:'Usuario creado. Confirma el correo si está habilitada la confirmación.'}
+  catch(err){$('#msg').textContent='No se pudo conectar con Supabase. Puedes continuar en modo local.'}
+}
 const navs=[['inicio','Inicio','▦'],['empresas','Empresas','▣'],['clientes','Clientes','♙'],['proveedores','Proveedores','◈'],['ventas','Ventas','$'],['compras','Compras','▤'],['contabilidad','Contabilidad','◫'],['reportes','Reportes','◒'],['tributario','Tributario','◉'],['sunat','SUNAT','✓']];
 function render(){const role=state.profile?.role||'superadmin',admin=role==='superadmin';$('#app').innerHTML=`<div class="shell"><aside id="side"><div class="brand">Conta<span>Pro</span></div><div class="userbox"><b>${esc(state.user?.email||'Administrador')}</b><small>${esc(role)}</small></div>${navs.map(n=>`<button class="nav ${state.section===n[0]?'active':''}" data-section="${n[0]}"><i>${n[2]}</i>${n[1]}</button>`).join('')}${admin?`<button class="nav ${state.section==='admin'?'active':''}" data-section="admin"><i>⚙</i>SuperAdmin</button>`:''}<button id="logout" class="nav"><i>⇥</i>Salir</button></aside><main class="main"><header><button id="menu" class="hamb">☰</button><div><h1>${title(state.section)}</h1><small>${esc(currentCompany()?.name||'Sin empresa seleccionada')}</small></div><select id="companySelect"><option value="">${state.companies.length?'Seleccionar empresa':'Sin empresas'}</option>${state.companies.map(c=>`<option value="${c.id}" ${c.id===state.companyId?'selected':''}>${esc(c.name)}${c.status==='Inactivo'?' (Inactiva)':''}</option>`).join('')}</select></header><div id="content"></div></main></div>`;document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;render()});$('#companySelect').onchange=e=>{state.companyId=e.target.value||null;render()};$('#logout').onclick=async()=>{if(sb)await sb.auth.signOut();else{state.user=null;renderLogin()}};$('#menu').onclick=()=>$('#side').classList.toggle('open');renderSection()}
 function title(s){return ({inicio:'Panel principal',empresas:'Empresas',clientes:'Clientes',proveedores:'Proveedores',ventas:'Ventas',compras:'Compras',contabilidad:'Contabilidad',reportes:'Reportes',tributario:'Tributario',sunat:'SUNAT',admin:'SuperAdmin'})[s]||'ContaPro'}
