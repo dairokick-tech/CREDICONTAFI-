@@ -1,27 +1,26 @@
-# ContaPro — Plataforma contable + integración SUNAT
+# ContaPro — Backend de integración SUNAT
 
-## Incluye
-Frontend + backend Node.js + módulo SUNAT + SVG de marca.
+Este proyecto añade un backend seguro al frontend ContaPro.
 
-### Integración preparada
-- Backend mantiene las credenciales fuera del navegador.
-- Endpoint para obtener token OAuth 2.0 del API SIRE cuando se configuren las credenciales autorizadas.
-- Endpoint de estado SUNAT.
-- Gestión básica de empresas, clientes, compras y ventas.
-- Comprobantes demo.
-- Estructura lista para persistencia.
+## Qué está preparado
+- API propia para el frontend.
+- Variables de entorno para credenciales.
+- Endpoint de salud.
+- Endpoint de estado de configuración SUNAT.
+- Creación y consulta de comprobantes de prueba.
+- Punto de integración para envío a SUNAT.
+- Las credenciales nunca se exponen al navegador.
 
-### Emisión electrónica real
-SUNAT publica servicios web de producción para el envío de comprobantes y servicios de consulta de validez/CDR. Para un sistema propio también deben implementarse el XML UBL, firma digital, reglas de validación, envío y procesamiento del CDR.
+## Importante
+El envío real de CPE a SUNAT requiere implementar el formato XML correspondiente, firma digital/certificado y las reglas de validación del comprobante, además de configurar el ambiente y credenciales correspondientes. SUNAT publica los servicios web oficiales y sus manuales; por seguridad, no se incluyen credenciales reales en este paquete.
 
-El proyecto no contiene certificados ni credenciales reales. Deben configurarse en el servidor.
+## Ejecutar
+1. Instala Node.js.
+2. Copia `.env.example` como `.env`.
+3. Completa las variables autorizadas para tu empresa.
+4. Ejecuta `npm install`.
+5. Ejecuta `npm start`.
+6. Abre `http://localhost:3000`.
 
-### Ejecutar
-cd backend
-npm install
-npm start
-
-Abrir http://localhost:3000
-
-### Producción
-Antes de usarlo con operaciones reales: incorporar base de datos PostgreSQL/MySQL, autenticación robusta, almacenamiento seguro de secretos, certificado digital, XML/firma, pruebas en beta y luego producción, logging, auditoría, backups y controles de acceso.
+## Próxima integración
+Conectar el módulo `src/sunat.js` con el generador XML + firma digital y el servicio oficial de SUNAT, y después guardar comprobantes/CDR en una base de datos.
