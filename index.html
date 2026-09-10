@@ -1,56 +1,14 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ContaPro | Estudio Contable</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ContaPro — Sistema de Gestión</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="index.html"><img class="brand-svg" src="assets/contapro-logo.svg" alt="ContaPro"></a>
-  <nav><a href="#servicios">Servicios</a><a href="#beneficios">Beneficios</a><a href="#contacto">Contacto</a></nav>
-  <a class="btn small" href="login.html">Ingresar</a>
-</header>
-<main>
-<section class="hero">
- <div>
-  <span class="eyebrow">ESTUDIO CONTABLE + PLATAFORMA DIGITAL</span>
-  <h1>Tu contabilidad, <span>ordenada y bajo control.</span></h1>
-  <p>Gestiona empresas, comprobantes, compras, ventas, reportes y finanzas desde un solo lugar.</p>
-  <div class="actions"><a class="btn" href="login.html">Entrar a la plataforma</a><a class="btn ghost" href="#servicios">Conocer funciones</a></div>
-  <div class="trust"><span>✓ Multiempresa</span><span>✓ Reportes</span><span>✓ Acceso desde cualquier dispositivo</span></div>
- </div>
- <div class="hero-card">
-   <div class="mini-top"><b>Resumen general</b><span>2026</span></div>
-   <div class="metric"><small>Ventas del periodo</small><strong>S/ 128,450</strong><em>+12.8%</em></div>
-   <div class="bars"><i style="height:45%"></i><i style="height:60%"></i><i style="height:52%"></i><i style="height:78%"></i><i style="height:68%"></i><i style="height:90%"></i></div>
-   <div class="mini-grid"><span>Empresas <b>8</b></span><span>Comprobantes <b>1,284</b></span></div>
- </div>
-</section>
-
-<section id="servicios" class="section">
- <div class="section-head"><span class="eyebrow">PLATAFORMA</span><h2>Todo lo que necesitas para administrar tu contabilidad</h2></div>
- <div class="cards">
-  <article><b>🏢</b><h3>Empresas</h3><p>Registra y administra múltiples empresas desde un mismo panel.</p></article>
-  <article><b>🧾</b><h3>Compras y ventas</h3><p>Organiza comprobantes, clientes, proveedores e importes.</p></article>
-  <article><b>📚</b><h3>Contabilidad</h3><p>Plan contable, asientos, libro diario, mayor y balances.</p></article>
-  <article><b>📊</b><h3>Reportes</h3><p>Consulta indicadores y estados financieros de forma clara.</p></article>
-  <article><b>🧮</b><h3>Tributación</h3><p>Centraliza información útil para tus obligaciones tributarias.</p></article>
-  <article><b>👥</b><h3>Usuarios</h3><p>Gestiona accesos y perfiles para tu equipo de trabajo.</p></article>
- </div>
-</section>
-
-<section id="beneficios" class="section dark">
- <div><span class="eyebrow">PARA TU ESTUDIO</span><h2>Trabaja más rápido y toma mejores decisiones.</h2><p>Una interfaz sencilla para concentrar la información financiera y administrativa de tus clientes.</p></div>
- <div class="benefits"><div><strong>01</strong><span>Información centralizada</span></div><div><strong>02</strong><span>Panel con indicadores</span></div><div><strong>03</strong><span>Reportes exportables</span></div><div><strong>04</strong><span>Diseño responsive</span></div></div>
-</section>
-
-<section id="contacto" class="section contact">
- <div><span class="eyebrow">CONTACTO</span><h2>¿Listo para digitalizar tu estudio?</h2><p>Solicita una demostración o adapta la plataforma a las necesidades de tu negocio.</p></div>
- <form id="contactForm"><input required placeholder="Nombre"><input required type="email" placeholder="Correo"><textarea required placeholder="¿En qué podemos ayudarte?"></textarea><button class="btn" type="submit">Enviar consulta</button></form>
-</section>
-</main>
-<footer>© 2026 ContaPro · Estudio Contable Digital</footer>
-<script>document.querySelector('#contactForm').addEventListener('submit',e=>{e.preventDefault();alert('Gracias. Tu consulta fue registrada en esta demo.');e.target.reset()})</script>
-</body></html>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
