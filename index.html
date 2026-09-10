@@ -5,61 +5,157 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PAGÓYA | Compra, vende y paga</title>
 <style>
-:root{--p:#5b35d5;--p2:#7c55ef;--bg:#f6f7fb;--text:#171725;--muted:#6d6d7a;--card:#fff;--ok:#159957}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}.top{background:#17121f;color:#fff;text-align:center;padding:8px;font-size:13px}
+:root{--p:#5b35d5;--p2:#7c55ef;--bg:#f6f7fb;--text:#171725;--muted:#6d6d7a;--card:#fff;--ok:#159957;--danger:#e53935}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.top{background:#17121f;color:#fff;text-align:center;padding:8px;font-size:13px}
 header{background:#fff;position:sticky;top:0;z-index:5;box-shadow:0 2px 12px #0000000d}
-.nav{max-width:1200px;margin:auto;padding:16px 20px;display:flex;align-items:center;gap:18px}
-.logo{font-size:28px;font-weight:900;color:var(--p);letter-spacing:-1px}.search{flex:1;display:flex;background:#f1f1f5;border-radius:12px;overflow:hidden}.search input{border:0;background:transparent;padding:13px 15px;outline:0;width:100%}.search button{border:0;background:var(--p);color:#fff;padding:0 20px;cursor:pointer}
-.navbtn{border:0;background:transparent;cursor:pointer;font-weight:700}.cart{position:relative}.badge{position:absolute;top:-8px;right:-8px;background:#ff4d67;color:white;border-radius:99px;font-size:11px;padding:3px 6px}
-.wrap{max-width:1200px;margin:auto;padding:25px 20px}.hero{display:grid;grid-template-columns:1.4fr .8fr;gap:20px;background:linear-gradient(135deg,#5b35d5,#8c67ff);color:#fff;border-radius:24px;padding:40px;overflow:hidden}.hero h1{font-size:44px;margin:0 0 12px}.hero p{font-size:18px;opacity:.9}.hero button,.primary{border:0;background:#fff;color:var(--p);font-weight:800;padding:13px 20px;border-radius:12px;cursor:pointer}.hero-card{background:#ffffff1c;border:1px solid #ffffff35;border-radius:20px;padding:25px;display:flex;align-items:center;justify-content:center;font-size:80px}
-.section-title{display:flex;justify-content:space-between;align-items:center;margin:30px 0 15px}.section-title h2{margin:0}.categories{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.cat{background:#fff;padding:20px 10px;border-radius:16px;text-align:center;cursor:pointer;border:1px solid #eee}.cat span{display:block;font-size:32px;margin-bottom:8px}.products{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.product{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #eee;position:relative}.pic{height:190px;background:linear-gradient(135deg,#eee,#fafafa);display:flex;align-items:center;justify-content:center;font-size:75px}.info{padding:15px}.price{font-size:21px;font-weight:900}.old{text-decoration:line-through;color:#999;font-size:13px;margin-left:7px}.rating{color:#e7a500;font-size:13px;margin:8px 0}.add{width:100%;margin-top:10px;padding:11px;border:0;background:var(--p);color:#fff;border-radius:10px;font-weight:800;cursor:pointer}
-.seller{background:#fff;border-radius:18px;padding:22px;margin-top:30px;display:flex;justify-content:space-between;align-items:center}.seller button{background:var(--p);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700}
-footer{margin-top:50px;background:#191522;color:#ddd;padding:40px 20px}.foot{max-width:1200px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}.foot h3{color:#fff}
-.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.panel{background:#fff;width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:20px;padding:25px}.close{float:right;border:0;background:#eee;border-radius:50%;width:34px;height:34px;cursor:pointer}.cart-item{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:12px 0}.empty{text-align:center;color:var(--muted);padding:30px}
-@media(max-width:800px){.hero{grid-template-columns:1fr;padding:28px}.hero h1{font-size:34px}.categories{grid-template-columns:repeat(3,1fr)}.products{grid-template-columns:repeat(2,1fr)}.foot{grid-template-columns:1fr 1fr}.nav{flex-wrap:wrap}.search{order:3;flex-basis:100%}}
-@media(max-width:480px){.products{grid-template-columns:1fr 1fr;gap:10px}.pic{height:140px}.hero-card{display:none}.categories{grid-template-columns:repeat(3,1fr)}}
+.nav{max-width:1200px;margin:auto;padding:10px 20px;display:flex;align-items:center;gap:15px}
+.logo-link{display:flex;align-items:center;text-decoration:none}
+.logo-img{width:74px;height:74px;object-fit:contain;border-radius:14px}
+.search{flex:1;display:flex;background:#f1f1f5;border-radius:12px;overflow:hidden;border:1px solid #eee}
+.search input{border:0;background:transparent;padding:13px 15px;outline:0;width:100%}
+.search button{border:0;background:var(--p);color:#fff;padding:0 20px}
+.navbtn{border:0;background:transparent;font-weight:700;padding:10px;position:relative}
+.navbtn:hover{color:var(--p)}
+.cart{position:relative}
+.badge{position:absolute;top:0;right:0;background:#ff4d67;color:#fff;border-radius:99px;font-size:11px;padding:3px 6px;min-width:18px;text-align:center}
+.wrap{max-width:1200px;margin:auto;padding:25px 20px}
+.hero{display:grid;grid-template-columns:1.4fr .8fr;gap:20px;background:linear-gradient(135deg,#5b35d5,#8c67ff);color:#fff;border-radius:24px;padding:40px;overflow:hidden}
+.hero h1{font-size:44px;margin:0 0 12px}
+.hero p{font-size:18px;opacity:.9}
+.hero button,.primary{border:0;background:#fff;color:var(--p);font-weight:800;padding:13px 20px;border-radius:12px}
+.hero-card{background:#ffffff1c;border:1px solid #ffffff35;border-radius:20px;padding:15px;display:flex;align-items:center;justify-content:center}
+.hero-card img{width:100%;max-width:330px;border-radius:18px;object-fit:contain}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:30px 0 15px}
+.section-title h2{margin:0}
+.categories{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.cat{background:#fff;padding:20px 10px;border-radius:16px;text-align:center;border:1px solid #eee;transition:.2s}
+.cat:hover{transform:translateY(-2px);box-shadow:0 8px 20px #00000010}
+.cat span{display:block;font-size:32px;margin-bottom:8px}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.product{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #eee;position:relative}
+.pic{height:190px;background:linear-gradient(135deg,#eee,#fafafa);display:flex;align-items:center;justify-content:center;font-size:75px}
+.info{padding:15px}
+.price{font-size:21px;font-weight:900}
+.rating{color:#e7a500;font-size:13px;margin:8px 0}
+.add{width:100%;margin-top:10px;padding:11px;border:0;background:var(--p);color:#fff;border-radius:10px;font-weight:800}
+.add:hover{background:var(--p2)}
+.seller{background:#fff;border-radius:18px;padding:22px;margin-top:30px;display:flex;justify-content:space-between;align-items:center}
+.seller button{background:var(--p);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700}
+footer{margin-top:50px;background:#191522;color:#ddd;padding:40px 20px}
+.foot{max-width:1200px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+.foot h3{color:#fff}
+.footer-btn{display:block;border:0;background:none;color:#ddd;padding:5px 0;text-align:left}
+.footer-btn:hover{color:#fff;text-decoration:underline}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.panel{background:#fff;width:min(650px,100%);max-height:90vh;overflow:auto;border-radius:20px;padding:25px}
+.close{float:right;border:0;background:#eee;border-radius:50%;width:34px;height:34px}
+.cart-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;padding:12px 0;gap:10px}
+.qty{display:flex;align-items:center;gap:7px}
+.qty button{border:0;background:#eee;border-radius:7px;width:30px;height:30px}
+.remove{border:0;background:#fee;color:var(--danger);border-radius:7px;padding:6px 8px}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.field{width:100%;padding:13px;margin:8px 0;border:1px solid #ddd;border-radius:10px}
+.pay-box{text-align:center}
+.qr{display:block;width:min(420px,100%);max-height:55vh;object-fit:contain;margin:15px auto;border-radius:14px}
+.note{background:#f4f1ff;padding:12px;border-radius:10px;color:#4a3a82}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.actions button{border:0;border-radius:10px;padding:11px 16px;font-weight:700}
+.secondary{background:#eee}
 </style>
 </head>
 <body>
 <div class="top">🚚 Envíos y promociones especiales • Compra seguro en PAGÓYA</div>
-<header><div class="nav">
-<div class="logo">PAGÓYA</div>
-<div class="search"><input id="search" placeholder="¿Qué estás buscando?"><button onclick="filterProducts()">🔎</button></div>
-<button class="navbtn" onclick="openModal('login')">👤 Cuenta</button>
-<button class="navbtn cart" onclick="openCart()">🛒<span class="badge" id="badge">0</span></button>
-</div></header>
 
-<main class="wrap">
+<header>
+  <div class="nav">
+    <a class="logo-link" href="#" onclick="goHome(event)" aria-label="Inicio">
+      <img class="logo-img" src="assets/logo-pagoya.png" alt="Logo PAGÓYA">
+    </a>
+
+    <form class="search" onsubmit="filterProducts();return false;">
+      <input id="search" placeholder="¿Qué estás buscando?" aria-label="Buscar productos">
+      <button type="submit" title="Buscar">🔎</button>
+    </form>
+
+    <button class="navbtn" onclick="openModal('login')" title="Mi cuenta">👤 Cuenta</button>
+    <button class="navbtn cart" onclick="openCart()" title="Carrito">
+      🛒 <span class="badge" id="badge">0</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="inicio">
 <section class="hero">
-<div><h1>Compra. Vende. Paga.</h1><p>Tu marketplace integral para descubrir productos, comprar de forma sencilla y hacer crecer tu negocio.</p><button onclick="document.getElementById('catalogo').scrollIntoView()">Ver productos</button></div>
-<div class="hero-card">🛍️</div>
+  <div>
+    <h1>Compra. Vende. Paga.</h1>
+    <p>Tu marketplace integral para descubrir productos, comprar de forma sencilla y hacer crecer tu negocio.</p>
+    <button onclick="document.getElementById('catalogo').scrollIntoView()">Ver productos</button>
+  </div>
+  <div class="hero-card"><img src="assets/logo-pagoya.png" alt="PAGÓYA"></div>
 </section>
 
 <div class="section-title"><h2>Categorías</h2></div>
 <section class="categories">
-<div class="cat" onclick="choose('Tecnología')"><span>📱</span>Tecnología</div>
-<div class="cat" onclick="choose('Moda')"><span>👕</span>Moda</div>
-<div class="cat" onclick="choose('Hogar')"><span>🏠</span>Hogar</div>
-<div class="cat" onclick="choose('Belleza')"><span>💄</span>Belleza</div>
-<div class="cat" onclick="choose('Alimentos')"><span>🍎</span>Alimentos</div>
-<div class="cat" onclick="choose('Deportes')"><span>⚽</span>Deportes</div>
+  <button class="cat" onclick="choose('Tecnología')"><span>📱</span>Tecnología</button>
+  <button class="cat" onclick="choose('Moda')"><span>👕</span>Moda</button>
+  <button class="cat" onclick="choose('Hogar')"><span>🏠</span>Hogar</button>
+  <button class="cat" onclick="choose('Belleza')"><span>💄</span>Belleza</button>
+  <button class="cat" onclick="choose('Alimentos')"><span>🍎</span>Alimentos</button>
+  <button class="cat" onclick="choose('Deportes')"><span>⚽</span>Deportes</button>
 </section>
 
-<div class="section-title" id="catalogo"><h2>Productos destacados</h2><select id="sort" onchange="sortProducts()"><option value="default">Ordenar</option><option value="low">Precio menor</option><option value="high">Precio mayor</option></select></div>
+<div class="section-title" id="catalogo">
+  <h2>Productos destacados</h2>
+  <select id="sort" onchange="sortProducts()" aria-label="Ordenar productos">
+    <option value="default">Ordenar</option>
+    <option value="low">Precio menor</option>
+    <option value="high">Precio mayor</option>
+  </select>
+</div>
 <section class="products" id="products"></section>
 
-<div class="seller"><div><h2>¿Tienes un negocio?</h2><p>Registra tu tienda y publica tus productos en PAGÓYA.</p></div><button onclick="openModal('seller')">Registrar mi negocio</button></div>
+<div class="seller">
+  <div><h2>¿Tienes un negocio?</h2><p>Registra tu tienda y publica tus productos en PAGÓYA.</p></div>
+  <button onclick="openModal('seller')">🏪 Registrar mi negocio</button>
+</div>
 </main>
 
-<footer><div class="foot">
-<div><h2>PAGÓYA</h2><p>Compra, vende y paga desde un solo lugar.</p></div>
-<div><h3>Comprar</h3><p>Productos</p><p>Ofertas</p><p>Pedidos</p></div>
-<div><h3>Vender</h3><p>Registrar tienda</p><p>Panel vendedor</p><p>Comisiones</p></div>
-<div><h3>Ayuda</h3><p>Centro de ayuda</p><p>Contacto</p><p>Seguridad</p></div>
-</div></footer>
+<footer>
+<div class="foot">
+  <div><h2>PAGÓYA</h2><p>Compra, vende y paga desde un solo lugar.</p></div>
+  <div>
+    <h3>Comprar</h3>
+    <button class="footer-btn" onclick="goCatalog()">Productos</button>
+    <button class="footer-btn" onclick="showOffers()">Ofertas</button>
+    <button class="footer-btn" onclick="openCart()">Pedidos / carrito</button>
+  </div>
+  <div>
+    <h3>Vender</h3>
+    <button class="footer-btn" onclick="openModal('seller')">Registrar tienda</button>
+    <button class="footer-btn" onclick="openModal('seller')">Panel vendedor</button>
+    <button class="footer-btn" onclick="showInfo('Comisiones','Esta versión es una demo. Las comisiones se configurarían en el backend.')">Comisiones</button>
+  </div>
+  <div>
+    <h3>Ayuda</h3>
+    <button class="footer-btn" onclick="showInfo('Centro de ayuda','Aquí puedes colocar preguntas frecuentes y soporte.')">Centro de ayuda</button>
+    <button class="footer-btn" onclick="showInfo('Contacto','Agrega aquí el correo o WhatsApp oficial de tu negocio.')">Contacto</button>
+    <button class="footer-btn" onclick="showInfo('Seguridad','Nunca compartas contraseñas ni datos sensibles.')">Seguridad</button>
+  </div>
+</div>
+</footer>
 
-<div class="modal" id="modal"><div class="panel"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div>
+<div class="modal" id="modal" onclick="backdropClose(event)">
+  <div class="panel">
+    <button class="close" onclick="closeModal()" aria-label="Cerrar">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
 
 <script>
 const data=[
@@ -72,23 +168,138 @@ const data=[
 {id:7,name:"Kit de cuidado personal",cat:"Belleza",price:75,emoji:"💄",rating:4.5},
 {id:8,name:"Balón deportivo",cat:"Deportes",price:69,emoji:"⚽",rating:4.6}
 ];
+
 let cart=[];
-function render(list=data){document.getElementById("products").innerHTML=list.map(p=>`<article class="product"><div class="pic">${p.emoji}</div><div class="info"><b>${p.name}</b><div class="rating">⭐ ${p.rating}</div><div class="price">S/ ${p.price.toFixed(2)}</div><button class="add" onclick="add(${p.id})">Agregar al carrito</button></div></article>`).join("")}
-function add(id){cart.push(data.find(p=>p.id===id));updateBadge();alert("Producto agregado al carrito");}
-function updateBadge(){document.getElementById("badge").textContent=cart.length}
-function openCart(){openModal("cart")}
-function openModal(type){
-document.getElementById("modal").classList.add("open");
-let c=document.getElementById("modalContent");
-if(type==="cart"){let total=cart.reduce((s,p)=>s+p.price,0);c.innerHTML=`<h2>🛒 Mi carrito</h2>${cart.length?cart.map((p,i)=>`<div class="cart-item"><span>${p.emoji} ${p.name}</span><b>S/ ${p.price.toFixed(2)}</b></div>`).join("")+`<h3>Total: S/ ${total.toFixed(2)}</h3><button class="add" onclick="checkout()">Continuar compra</button>`:'<div class="empty">Tu carrito está vacío.</div>`}
-if(type==="login")c.innerHTML=`<h2>👤 Iniciar sesión</h2><input style="width:100%;padding:13px;margin:8px 0" placeholder="Correo electrónico"><input style="width:100%;padding:13px;margin:8px 0" placeholder="Contraseña" type="password"><button class="add" onclick="alert('Demo: sesión iniciada')">Ingresar</button>`;
-if(type==="seller")c.innerHTML=`<h2>🏪 Registrar mi negocio</h2><p>Crea tu tienda en PAGÓYA.</p><input style="width:100%;padding:13px;margin:8px 0" placeholder="Nombre del negocio"><input style="width:100%;padding:13px;margin:8px 0" placeholder="Correo"><button class="add" onclick="alert('Demo: solicitud enviada')">Crear tienda</button>`;
+
+function render(list=data){
+  document.getElementById("products").innerHTML=list.length
+  ? list.map(p=>`<article class="product">
+      <div class="pic">${p.emoji}</div>
+      <div class="info">
+        <b>${p.name}</b>
+        <div class="rating">⭐ ${p.rating}</div>
+        <div class="price">S/ ${p.price.toFixed(2)}</div>
+        <button class="add" onclick="add(${p.id})">Agregar al carrito</button>
+      </div>
+    </article>`).join("")
+  : '<div class="empty" style="grid-column:1/-1">No encontramos productos.</div>';
 }
-function checkout(){alert("Demo de checkout. Aquí se conectaría el pago y la dirección de entrega.");}
+
+function add(id){
+  const item=data.find(p=>p.id===id);
+  const existing=cart.find(p=>p.id===id);
+  if(existing) existing.qty++;
+  else cart.push({...item,qty:1});
+  updateBadge();
+  alert("Producto agregado al carrito");
+}
+
+function updateBadge(){
+  document.getElementById("badge").textContent=cart.reduce((n,p)=>n+p.qty,0);
+}
+
+function openCart(){openModal("cart")}
+
+function openModal(type){
+  document.getElementById("modal").classList.add("open");
+  const c=document.getElementById("modalContent");
+
+  if(type==="cart"){
+    const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
+    c.innerHTML=`<h2>🛒 Mi carrito</h2>${
+      cart.length
+      ? cart.map((p,i)=>`<div class="cart-item">
+          <span>${p.emoji} ${p.name}</span>
+          <div class="qty">
+            <button onclick="changeQty(${i},-1)">−</button><b>${p.qty}</b>
+            <button onclick="changeQty(${i},1)">+</button>
+            <button class="remove" onclick="removeItem(${i})">Eliminar</button>
+          </div>
+          <b>S/ ${(p.price*p.qty).toFixed(2)}</b>
+        </div>`).join("")
+        +`<h3>Total: S/ ${total.toFixed(2)}</h3>
+          <button class="add" onclick="checkout()">Continuar con el pago</button>`
+      : '<div class="empty">Tu carrito está vacío.</div>'}`;
+  }
+
+  if(type==="login"){
+    c.innerHTML=`<h2>👤 Iniciar sesión</h2>
+      <input class="field" placeholder="Correo electrónico" type="email">
+      <input class="field" placeholder="Contraseña" type="password">
+      <button class="add" onclick="demoLogin()">Ingresar</button>`;
+  }
+
+  if(type==="seller"){
+    c.innerHTML=`<h2>🏪 Registrar mi negocio</h2><p>Crea tu tienda en PAGÓYA.</p>
+      <input class="field" placeholder="Nombre del negocio">
+      <input class="field" placeholder="Correo" type="email">
+      <input class="field" placeholder="Teléfono">
+      <button class="add" onclick="demoSeller()">Crear tienda</button>`;
+  }
+}
+
+function checkout(){
+  if(!cart.length){alert("Tu carrito está vacío.");return;}
+  const total=cart.reduce((s,p)=>s+p.price*p.qty,0);
+  document.getElementById("modalContent").innerHTML=`
+    <div class="pay-box">
+      <h2>💳 Método de pago</h2>
+      <p>Total a pagar: <strong>S/ ${total.toFixed(2)}</strong></p>
+      <div class="note">Escanea el código QR mostrado para el pago con Yape.</div>
+      <img class="qr" src="assets/qr-pago.png" alt="Código QR de pago">
+      <p><strong>PAGÓYA</strong> • Pago mediante QR</p>
+      <div class="actions">
+        <button class="primary" style="background:var(--p);color:#fff" onclick="finishPayment()">✓ Confirmar pago (demo)</button>
+        <button class="secondary" onclick="openCart()">← Volver al carrito</button>
+      </div>
+    </div>`;
+}
+
+function finishPayment(){
+  alert("Pago registrado en modo demostración.");
+  cart=[]; updateBadge(); closeModal();
+}
+
+function changeQty(i,delta){
+  cart[i].qty+=delta;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  updateBadge(); openCart();
+}
+
+function removeItem(i){cart.splice(i,1);updateBadge();openCart()}
+
 function closeModal(){document.getElementById("modal").classList.remove("open")}
-function filterProducts(){let q=document.getElementById("search").value.toLowerCase();render(data.filter(p=>(p.name+" "+p.cat).toLowerCase().includes(q)))}
-function choose(cat){render(data.filter(p=>p.cat===cat));document.getElementById("catalogo").scrollIntoView()}
-function sortProducts(){let a=[...data];let v=document.getElementById("sort").value;if(v==="low")a.sort((x,y)=>x.price-y.price);if(v==="high")a.sort((x,y)=>y.price-x.price);render(a)}
+function backdropClose(e){if(e.target.id==="modal")closeModal()}
+
+function filterProducts(){
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  render(data.filter(p=>(p.name+" "+p.cat).toLowerCase().includes(q)));
+  document.getElementById("catalogo").scrollIntoView();
+}
+
+function choose(cat){
+  render(data.filter(p=>p.cat===cat));
+  document.getElementById("catalogo").scrollIntoView();
+}
+
+function sortProducts(){
+  let a=[...data],v=document.getElementById("sort").value;
+  if(v==="low")a.sort((x,y)=>x.price-y.price);
+  if(v==="high")a.sort((x,y)=>y.price-x.price);
+  render(a);
+}
+
+function goCatalog(){document.getElementById("catalogo").scrollIntoView()}
+function goHome(e){if(e)e.preventDefault();window.scrollTo({top:0,behavior:"smooth"});render()}
+function showOffers(){render(data.filter(p=>p.price<150));goCatalog()}
+function showInfo(title,text){
+  openModal("info");
+  document.getElementById("modalContent").innerHTML=`<h2>${title}</h2><p>${text}</p><button class="add" onclick="closeModal()">Cerrar</button>`;
+}
+function demoLogin(){alert("Inicio de sesión en modo demostración.");closeModal()}
+function demoSeller(){alert("Solicitud de registro enviada en modo demostración.");closeModal()}
+
 render();
 </script>
-</body></html>
+</body>
+</html>

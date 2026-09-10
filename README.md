@@ -1,25 +1,24 @@
-# PAGÓYA — tienda online (demo frontend)
+# PAGÓYA — tienda online
 
-Incluye:
-- Inicio, buscador y categorías
-- Catálogo responsive
-- Filtros por categoría y orden por precio
-- Carrito funcional en el navegador
-- Modal de inicio de sesión
-- Registro de negocio (demo)
-- Checkout de demostración
-- Diseño responsive para celular y PC
+Versión corregida del frontend.
+
+## Incluye
+- Logo personalizado.
+- Buscador funcional.
+- Categorías funcionales.
+- Ordenamiento por precio.
+- Carrito con cantidades y eliminación.
+- Inicio de sesión de demostración.
+- Registro de negocio de demostración.
+- Checkout con QR de pago proporcionado.
+- Diseño responsive para celular y PC.
+
+## Estructura
+- `index.html`
+- `assets/logo-pagoya.png`
+- `assets/qr-pago.png`
 
 ## Uso
 Abre `index.html` en un navegador.
 
-## Para convertirlo en plataforma real
-Conectar:
-- Backend/API
-- Base de datos
-- Autenticación
-- Pasarela de pagos
-- Gestión de inventario
-- Pedidos y envíos
-- Panel de vendedor
-- Panel administrador
+**Nota:** el pago QR y las acciones de cuenta/registro funcionan como demostración frontend. Para pagos reales se requiere conectar un backend y una pasarela o integración autorizada.
