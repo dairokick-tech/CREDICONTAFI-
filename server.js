@@ -1,74 +1,22 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import dotenv from "dotenv";
-import { v4 as uuid } from "uuid";
-import { sunatStatus, buildDemoInvoice, getSireToken } from "./sunat.js";
-import { store } from "./store.js";
-
-dotenv.config();
-const app=express();
-app.use(helmet());
-app.use(cors({origin:true}));
-app.use(express.json({limit:"2mb"}));
-
-app.get("/api/health",(req,res)=>res.json({ok:true,service:"ContaPro API",time:new Date().toISOString()}));
-app.get("/api/sunat/status",(req,res)=>res.json(sunatStatus()));
-app.post("/api/sunat/sire/token",async(req,res)=>{
-  try{
-    const token=await getSireToken();
-    res.json({ok:true,token_type:token.token_type,expires_in:token.expires_in,scope:token.scope});
-  }catch(e){
-    const status=e.response?.status||500;
-    res.status(status).json({ok:false,error:e.response?.data||e.message});
-  }
-});
-
-app.get("/api/empresas",(req,res)=>res.json(store.companies));
-app.post("/api/empresas",(req,res)=>{
-  const {ruc,name}=req.body||{};
-  if(!ruc||!name) return res.status(400).json({error:"RUC y razón social son obligatorios"});
-  const item={id:Date.now(),ruc,name,status:"Activo"};
-  store.companies.push(item); res.status(201).json(item);
-});
-
-app.get("/api/clientes",(req,res)=>res.json(store.customers));
-app.post("/api/clientes",(req,res)=>{
-  const item={id:Date.now(),...req.body};
-  store.customers.push(item);res.status(201).json(item);
-});
-
-app.get("/api/compras",(req,res)=>res.json(store.purchases));
-app.post("/api/compras",(req,res)=>{
-  const item={id:Date.now(),...req.body};
-  store.purchases.push(item);res.status(201).json(item);
-});
-
-app.get("/api/ventas",(req,res)=>res.json(store.sales));
-app.post("/api/ventas",(req,res)=>{
-  const item={id:Date.now(),...req.body};
-  store.sales.push(item);res.status(201).json(item);
-});
-
-app.post("/api/comprobantes/demo",(req,res)=>{
-  const id=uuid(), invoice=buildDemoInvoice(req.body||{});
-  const item={id,status:"PENDIENTE_DE_ENVIO",invoice,createdAt:new Date().toISOString()};
-  store.vouchers.push(item); res.status(201).json(item);
-});
-app.get("/api/comprobantes",(req,res)=>res.json(store.vouchers));
-app.get("/api/comprobantes/:id",(req,res)=>{
-  const item=store.vouchers.find(x=>x.id===req.params.id);
-  if(!item)return res.status(404).json({error:"Comprobante no encontrado"});
-  res.json(item);
-});
-app.post("/api/comprobantes/:id/enviar",(req,res)=>{
-  const item=store.vouchers.find(x=>x.id===req.params.id);
-  if(!item)return res.status(404).json({error:"Comprobante no encontrado"});
-  item.status="LISTO_PARA_ENVIO_SUNAT";
-  item.message="Conector SUNAT pendiente de certificado, firma XML y credenciales de producción.";
-  res.json(item);
-});
-
-app.use(express.static("public"));
-const port=process.env.PORT||3000;
-app.listen(port,()=>console.log(`ContaPro API ejecutándose en http://localhost:${port}`));
+const express=require('express');const fs=require('fs');const path=require('path');const crypto=require('crypto');
+const app=express();app.use(express.json({limit:'2mb'}));app.use(express.static(path.join(__dirname,'public')));
+const DATA=path.join(__dirname,'data','contapro.json');const SECRET=process.env.CONTAPRO_SECRET||'CHANGE-ME-CONTAPRO-SECRET';
+function id(){return crypto.randomUUID()} function hash(p){return crypto.createHash('sha256').update(p).digest('hex')}
+function blank(){return {users:[],companies:[],clients:[],suppliers:[],sales:[],purchases:[]}}
+function db(){try{return JSON.parse(fs.readFileSync(DATA,'utf8'))}catch{return blank()}}
+function save(d){fs.mkdirSync(path.dirname(DATA),{recursive:true});fs.writeFileSync(DATA+'.tmp',JSON.stringify(d,null,2));fs.renameSync(DATA+'.tmp',DATA)}
+let d=db();if(!d.users.length){d.users.push({id:id(),email:'admin@contapro.local',password:hash('ContaPro-Admin-2026'),name:'SuperAdmin',role:'superadmin',created_at:new Date().toISOString()});save(d)}
+function token(uid){const body=Buffer.from(JSON.stringify({uid})).toString('base64url');const sig=crypto.createHmac('sha256',SECRET).update(body).digest('base64url');return body+'.'+sig}
+function userFrom(req){const t=(req.headers.authorization||'').replace(/^Bearer /,'');if(!t)return null;const [b,s]=t.split('.');if(!b||!s)return null;const good=crypto.createHmac('sha256',SECRET).update(b).digest('base64url');if(s!==good)return null;try{const x=JSON.parse(Buffer.from(b,'base64url').toString());return d.users.find(u=>u.id===x.uid)||null}catch{return null}}
+function auth(req,res,next){const u=userFrom(req);if(!u)return res.status(401).json({error:'Sesión no válida'});req.user=u;next()}
+const collections={companies:'companies',clients:'clients',suppliers:'suppliers',sales:'sales',purchases:'purchases'};
+app.post('/api/login',(req,res)=>{const {email,password}=req.body||{};const u=d.users.find(x=>x.email.toLowerCase()===String(email||'').toLowerCase()&&x.password===hash(String(password||'')));if(!u)return res.status(401).json({error:'Correo o contraseña incorrectos'});res.json({token:token(u.id),user:{id:u.id,email:u.email,name:u.name,role:u.role}})});
+app.post('/api/signup',(req,res)=>{const {email,password,name}=req.body||{};if(!email||!password||String(password).length<6)return res.status(400).json({error:'Correo y contraseña de mínimo 6 caracteres.'});if(d.users.some(u=>u.email.toLowerCase()===String(email).toLowerCase()))return res.status(409).json({error:'El usuario ya existe.'});const u={id:id(),email:String(email).toLowerCase(),password:hash(password),name:name||email,role:'admin',created_at:new Date().toISOString()};d.users.push(u);save(d);res.json({token:token(u.id),user:{id:u.id,email:u.email,name:u.name,role:u.role}})});
+app.get('/api/me',auth,(req,res)=>res.json({id:req.user.id,email:req.user.email,name:req.user.name,role:req.user.role}));
+app.get('/api/data',auth,(req,res)=>res.json({companies:d.companies,clients:d.clients,suppliers:d.suppliers,sales:d.sales,purchases:d.purchases}));
+app.post('/api/:type',auth,(req,res)=>{const key=collections[req.params.type];if(!key)return res.sendStatus(404);if(req.params.type==='companies'&&req.user.role!=='superadmin')return res.status(403).json({error:'Solo SuperAdmin puede registrar empresas.'});const obj={...req.body,id:id(),created_by:req.user.id,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};if(req.params.type!=='companies'&&!obj.company_id)return res.status(400).json({error:'Selecciona una empresa.'});d[key].unshift(obj);save(d);res.status(201).json(obj)});
+app.put('/api/:type/:id',auth,(req,res)=>{const key=collections[req.params.type];if(!key)return res.sendStatus(404);const i=d[key].findIndex(x=>x.id===req.params.id);if(i<0)return res.sendStatus(404);const old=d[key][i];if(req.params.type==='companies'&&req.user.role!=='superadmin')return res.status(403).json({error:'Solo SuperAdmin puede modificar empresas.'});d[key][i]={...old,...req.body,id:old.id,updated_at:new Date().toISOString()};save(d);res.json(d[key][i])});
+app.post('/api/admin/users',auth,(req,res)=>{if(req.user.role!=='superadmin')return res.sendStatus(403);const {email,password,name,role='admin'}=req.body||{};if(!email||!password)return res.status(400).json({error:'Faltan datos'});if(d.users.some(u=>u.email===email.toLowerCase()))return res.status(409).json({error:'Usuario existente'});const u={id:id(),email:email.toLowerCase(),password:hash(password),name:name||email,role,created_at:new Date().toISOString()};d.users.push(u);save(d);res.status(201).json({id:u.id,email:u.email,name:u.name,role:u.role})});
+app.get('/api/admin/users',auth,(req,res)=>{if(req.user.role!=='superadmin')return res.sendStatus(403);res.json(d.users.map(({password,...u})=>u))});
+app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));
+const port=process.env.PORT||3000;app.listen(port,()=>console.log(`ContaPro online en puerto ${port}`));
