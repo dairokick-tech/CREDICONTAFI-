@@ -39,20 +39,30 @@ function enterLocalMode(){
 }
 async function loadProfile(){const r=await sb.from('contapro_profiles').select('*').eq('id',state.user.id).maybeSingle();state.profile=r.data||{id:state.user.id,role:'user'};state.companyId=state.profile.company_id||null}
 async function loadAll(){const [a,b,c,d,e]=await Promise.all(['contapro_companies','contapro_clients','contapro_suppliers','contapro_sales','contapro_purchases'].map(t=>sb.from(t).select('*').order('created_at',{ascending:false})));state.companies=a.data||[];state.clients=b.data||[];state.suppliers=c.data||[];state.sales=d.data||[];state.purchases=e.data||[];if(!state.companyId)state.companyId=state.companies[0]?.id||null;if(a.error||b.error||c.error||d.error||e.error)toast('Revisa las tablas y permisos de Supabase.')}
-function renderLogin(message=''){$('#app').innerHTML=`<main class="login"><section class="login-card"><div class="brand">Conta<span>Pro</span></div><p class="muted">Sistema propio de gestión y control empresarial</p><form id="lf"><label>Correo<input id="email" type="email" autocomplete="email" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button class="primary wide" type="submit">Ingresar</button></form><button id="signup" class="ghost wide">Crear usuario</button><button id="local" class="ghost wide">Entrar en modo local</button><div id="msg" class="notice">${esc(message)}</div><small class="muted">El modo local permite continuar sin conexión; los datos quedan en este dispositivo.</small></section></main>`;$('#lf').onsubmit=login;$('#signup').onclick=signup;$('#local').onclick=enterLocalMode}
+function renderLogin(message=''){$('#app').innerHTML=`<main class="login"><section class="login-card"><div class="brand">Conta<span>Pro</span></div><p class="muted">Sistema propio de gestión y control empresarial</p><form id="lf"><label>Correo<input id="email" type="email" autocomplete="email" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button class="primary wide" type="submit">Ingresar</button></form><button id="signup" class="ghost wide">Crear usuario</button><button id="local" class="ghost wide">Entrar en modo local</button><div id="msg" class="notice">${esc(message)}</div><small class="muted">Acceso de instalación local: <b>admin@contapro.local</b> · <b>ContaPro-Admin-2026</b>. Este acceso solo sirve para probar el sistema en este dispositivo y no es una credencial de Supabase.</small></section></main>`;$('#lf').onsubmit=login;$('#signup').onclick=signup;$('#local').onclick=enterLocalMode}
 async function login(e){
   e.preventDefault();
+  const email=$('#email').value.trim().toLowerCase();
+  const password=$('#password').value;
+  const msg=$('#msg');
+  // Credencial de instalación LOCAL para poder entrar y probar el sistema aun cuando
+  // Supabase esté caído o mal configurado. No concede acceso a Supabase ni a datos cloud.
+  if(email==='admin@contapro.local' && password==='ContaPro-Admin-2026'){
+    enterLocalMode();
+    toast('Administrador local iniciado');
+    return;
+  }
   if(!sb){return enterLocalMode()}
-  const msg=$('#msg'); msg.textContent='Conectando...';
+  msg.textContent='Conectando...';
   try{
-    const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value,password:$('#password').value});
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
     if(error){msg.textContent=error.message;return}
     state.user=data.user;
     await loadProfile();
     await loadAll();
     render();
   }catch(err){
-    msg.innerHTML='No se pudo conectar con el servidor. Revisa tu conexión y la configuración de Supabase. <b>También puedes usar “Entrar en modo local”.</b>';
+    msg.innerHTML='No se pudo conectar con el servidor. Puedes usar el acceso local de administrador para probar el sistema.';
   }
 }
 async function signup(){
