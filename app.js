@@ -37,8 +37,24 @@ function enterLocalMode(){
   render();
   toast('Modo local activado. Los datos se guardan en este dispositivo.');
 }
-async function loadProfile(){const r=await sb.from('contapro_profiles').select('*').eq('id',state.user.id).maybeSingle();state.profile=r.data||{id:state.user.id,role:'user'};state.companyId=state.profile.company_id||null}
-async function loadAll(){const [a,b,c,d,e]=await Promise.all(['contapro_companies','contapro_clients','contapro_suppliers','contapro_sales','contapro_purchases'].map(t=>sb.from(t).select('*').order('created_at',{ascending:false})));state.companies=a.data||[];state.clients=b.data||[];state.suppliers=c.data||[];state.sales=d.data||[];state.purchases=e.data||[];if(!state.companyId)state.companyId=state.companies[0]?.id||null;if(a.error||b.error||c.error||d.error||e.error)toast('Revisa las tablas y permisos de Supabase.')}
+async function loadProfile(){
+  let r=await sb.from('contapro_profiles').select('*').eq('id',state.user.id).maybeSingle();
+  if(r.error){state.profile={id:state.user.id,role:'user'};state.companyId=null;return}
+  if(!r.data){
+    const b=await sb.rpc('contapro_bootstrap_first_superadmin');
+    if(!b.error){r=await sb.from('contapro_profiles').select('*').eq('id',state.user.id).maybeSingle()}
+  }
+  state.profile=r.data||{id:state.user.id,role:'user'};
+  state.companyId=state.profile.company_id||null
+}
+async function loadAll(){
+  const names=['contapro_companies','contapro_clients','contapro_suppliers','contapro_sales','contapro_purchases'];
+  const results=await Promise.all(names.map(t=>sb.from(t).select('*').order('created_at',{ascending:false})));
+  [state.companies,state.clients,state.suppliers,state.sales,state.purchases]=results.map(r=>r.data||[]);
+  if(!state.companyId)state.companyId=state.companies[0]?.id||null;
+  const bad=results.find(r=>r.error);
+  if(bad)toast('Base de datos: '+(bad.error.message||'revisa la migración ContaPro'));
+}
 function renderLogin(message=''){$('#app').innerHTML=`<main class="login"><section class="login-card"><div class="brand">Conta<span>Pro</span></div><p class="muted">Sistema propio de gestión y control empresarial</p><form id="lf"><label>Correo<input id="email" type="email" autocomplete="email" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button class="primary wide" type="submit">Ingresar</button></form><button id="signup" class="ghost wide">Crear usuario</button><button id="local" class="ghost wide">Entrar en modo local</button><div id="msg" class="notice">${esc(message)}</div><small class="muted">Acceso de instalación local: <b>admin@contapro.local</b> · <b>ContaPro-Admin-2026</b>. Este acceso solo sirve para probar el sistema en este dispositivo y no es una credencial de Supabase.</small></section></main>`;$('#lf').onsubmit=login;$('#signup').onclick=signup;$('#local').onclick=enterLocalMode}
 async function login(e){
   e.preventDefault();
@@ -93,8 +109,27 @@ function empty(n){return `<tr><td colspan="${n}" class="emptycell">No hay regist
 function label(d,k){const f=d.fields.find(x=>x[0]===k);return f?f[1]:k}
 function row(d,s,r){return `<tr class="${r.status==='Inactivo'||r.status==='Anulada'?'mutedrow':''}">${d.cols.map(k=>`<td>${k==='amount'||k==='balance'?money(r[k]):esc(r[k])}</td>`).join('')}<td><button class="link edit" data-id="${r.id}" data-s="${s}">Editar</button> <button class="link danger archive" data-id="${r.id}" data-s="${s}">${s==='empresas'?'Archivar':'Anular'}</button></td></tr>`}
 function bind(){document.querySelectorAll('.edit').forEach(b=>b.onclick=()=>form(b.dataset.s,b.dataset.id));document.querySelectorAll('.archive').forEach(b=>b.onclick=()=>archive(b.dataset.s,b.dataset.id))}
-function form(s,id){const d=defs[s],old=(state[s]||[]).find(x=>x.id===id)||{};const html=d.fields.map(([k,l,t])=>{if(t.startsWith('select:')){const opts=t.slice(7).split('|');return `<label>${esc(l)}<select name="${k}" required>${opts.map(o=>`<option ${String(old[k]??(k==='status'?'Activo':opts[0]))===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`}return `<label>${esc(l)}<input name="${k}" type="${t}" value="${esc(old[k]??(k==='date'?today():(k==='status'?'Activo':'')))}" ${k==='amount'||k==='balance'?'min="0" step="0.01"':''} required></label>`}).join('');const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-card"><div class="panel-head"><h2>${id?'Editar':'Nuevo'} ${d.label}</h2><button class="x">×</button></div><form id="ef">${html}<div class="actions"><button type="button" class="ghost cancel">Cancelar</button><button class="primary">Guardar</button></div><div id="formmsg"></div></form></div>`;document.body.appendChild(m);m.querySelector('.x').onclick=m.querySelector('.cancel').onclick=()=>m.remove();m.querySelector('form').onsubmit=async e=>{e.preventDefault();const obj=Object.fromEntries(new FormData(e.target));for(const k of ['amount','balance'])if(k in obj)obj[k]=Number(obj[k]||0);await persist(s,id,obj);if(!sb)localSave();m.remove();render()}}
-async function persist(s,id,obj){const d=defs[s];if(s!=='empresas')obj.company_id=state.companyId;if(!obj.company_id&&s!=='empresas')return toast('Selecciona una empresa antes de registrar.');if(!sb){if(id){const i=state[s].findIndex(x=>x.id===id);state[s][i]={...state[s][i],...obj,updated_at:new Date().toISOString()}}else state[s].unshift({id:uid(),...obj,created_at:new Date().toISOString()});return toast('Guardado correctamente')};if(!id&&s==='empresas'&&state.profile?.role!=='superadmin')return toast('Solo SuperAdmin puede registrar empresas.');if(!id){obj.created_by=state.user?.id;const r=await sb.from(d.table).insert(obj);if(r.error)return toast(r.error.message)}else{const r=await sb.from(d.table).update({...obj,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return toast(r.error.message)}await loadAll();toast('Guardado correctamente')}
+function form(s,id){const d=defs[s],old=(state[s]||[]).find(x=>x.id===id)||{};const html=d.fields.map(([k,l,t])=>{if(t.startsWith('select:')){const opts=t.slice(7).split('|');return `<label>${esc(l)}<select name="${k}" required>${opts.map(o=>`<option ${String(old[k]??(k==='status'?'Activo':opts[0]))===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`}return `<label>${esc(l)}<input name="${k}" type="${t}" value="${esc(old[k]??(k==='date'?today():(k==='status'?'Activo':'')))}" ${k==='amount'||k==='balance'?'min="0" step="0.01"':''} required></label>`}).join('');const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-card"><div class="panel-head"><h2>${id?'Editar':'Nuevo'} ${d.label}</h2><button class="x">×</button></div><form id="ef">${html}<div class="actions"><button type="button" class="ghost cancel">Cancelar</button><button class="primary">Guardar</button></div><div id="formmsg"></div></form></div>`;document.body.appendChild(m);m.querySelector('.x').onclick=m.querySelector('.cancel').onclick=()=>m.remove();m.querySelector('form').onsubmit=async e=>{e.preventDefault();const obj=Object.fromEntries(new FormData(e.target));for(const k of ['amount','balance'])if(k in obj)obj[k]=Number(obj[k]||0);const ok=await persist(s,id,obj);if(ok){if(!sb)localSave();m.remove();render()}}}
+async function persist(s,id,obj){
+  const d=defs[s];
+  if(s!=='empresas'){
+    if(!state.companyId){toast('Primero registra y selecciona una empresa.');return false}
+    obj.company_id=state.companyId;
+  }
+  if(!sb){
+    if(id){const i=state[s].findIndex(x=>x.id===id);if(i<0){toast('Registro no encontrado.');return false}state[s][i]={...state[s][i],...obj,updated_at:new Date().toISOString()}}
+    else state[s].unshift({id:uid(),...obj,created_at:new Date().toISOString()});
+    toast('Guardado correctamente');return true;
+  }
+  if(s==='empresas' && state.profile?.role!=='superadmin'){toast('Tu usuario aún no tiene rol SuperAdmin. Cierra sesión y vuelve a ingresar después de ejecutar la migración.');return false}
+  try{
+    let r;
+    if(!id){obj.created_by=state.user?.id;r=await sb.from(d.table).insert(obj).select('*').single()}
+    else r=await sb.from(d.table).update({...obj,updated_at:new Date().toISOString()}).eq('id',id).select('*').single();
+    if(r.error){toast('No se pudo guardar: '+r.error.message);return false}
+    await loadAll();toast('Guardado correctamente');return true;
+  }catch(err){toast('Error de conexión al guardar.');return false}
+}
 async function archive(s,id){const msg=s==='empresas'?'La empresa quedará Inactiva y conservará su historial.':'El registro quedará Anulado/Inactivo y conservará su historial.';if(!confirm(msg))return;const status=s==='empresas'?'Inactivo':s==='ventas'||s==='compras'?'Anulada':'Inactivo';if(!sb){const i=state[s].findIndex(x=>x.id===id);if(i>=0)state[s][i].status=status;localSave();return render()}const r=await sb.from(defs[s].table).update({status,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return toast(r.error.message);await loadAll();render()}
 function accounting(c){const s=period(state.sales,state.companyId),p=period(state.purchases,state.companyId);const rows=[...s.map(x=>({date:x.date,ref:x.document_no,detail:`Venta ${x.client_name||''}`,debit:Number(x.amount||0),credit:0})),...p.map(x=>({date:x.date,ref:x.document_no,detail:`Compra ${x.supplier_name||''}`,debit:0,credit:Number(x.amount||0)}))].sort((a,b)=>String(a.date).localeCompare(String(b.date)));c.innerHTML=`<section class="panel"><div class="panel-head"><h2>Contabilidad automática</h2><div class="actions"><button class="ghost" onclick="downloadJournal()">Exportar Diario</button><button class="primary" onclick="go('reportes')">Estados y reportes</button></div></div><div class="cards">${metric('Debe',money(sum(rows.map(x=>({amount:x.debit})))),'D')}${metric('Haber',money(sum(rows.map(x=>({amount:x.credit})))),'H')}</div><div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Comprobante</th><th>Detalle</th><th>Debe</th><th>Haber</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.ref)}</td><td>${esc(r.detail)}</td><td>${money(r.debit)}</td><td>${money(r.credit)}</td></tr>`).join('')||empty(5)}</tbody></table></div></section>`}
 window.downloadJournal=()=>{const s=period(state.sales,state.companyId),p=period(state.purchases,state.companyId),rows=[['Fecha','Comprobante','Detalle','Debe','Haber'],...s.map(x=>[x.date,x.document_no,'Venta',x.amount,0]),...p.map(x=>[x.date,x.document_no,'Compra',0,x.amount])];csv(rows,`libro-diario-${today()}.csv`)};

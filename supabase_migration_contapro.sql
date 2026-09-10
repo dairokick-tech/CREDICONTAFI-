@@ -108,6 +108,25 @@ create or replace function public.contapro_my_company()
 returns uuid language sql stable security definer set search_path=public
 as $$ select company_id from public.contapro_profiles where id=auth.uid(); $$;
 
+-- Bootstrap seguro: solo el primer usuario autenticado puede convertirse en SuperAdmin.
+-- Si ya existe cualquier perfil, no hace ningún cambio.
+create or replace function public.contapro_bootstrap_first_superadmin()
+returns boolean language plpgsql security definer set search_path=public
+as $$
+declare n integer;
+begin
+  if auth.uid() is null then return false; end if;
+  select count(*) into n from public.contapro_profiles;
+  if n > 0 then return false; end if;
+  insert into public.contapro_profiles(id,full_name,role)
+  values(auth.uid(), coalesce(auth.jwt()->>'email','Administrador principal'),'superadmin')
+  on conflict(id) do update set role='superadmin', updated_at=now();
+  return true;
+end;
+$$;
+
+grant execute on function public.contapro_bootstrap_first_superadmin() to authenticated;
+
 -- Policies: se eliminan SOLO policies con estos nombres para poder re-ejecutar
 -- la migración; las tablas y sus datos NO se eliminan.
 drop policy if exists contapro_companies_select on public.contapro_companies;
