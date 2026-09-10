@@ -1,27 +1,24 @@
-# ContaPro — Plataforma contable + integración SUNAT
+# ContaPro corregido
 
-## Incluye
-Frontend + backend Node.js + módulo SUNAT + SVG de marca.
+## Acceso
+Usuario: `admin`
+Contraseña: `Admin123!`
 
-### Integración preparada
-- Backend mantiene las credenciales fuera del navegador.
-- Endpoint para obtener token OAuth 2.0 del API SIRE cuando se configuren las credenciales autorizadas.
-- Endpoint de estado SUNAT.
-- Gestión básica de empresas, clientes, compras y ventas.
-- Comprobantes demo.
-- Estructura lista para persistencia.
+También:
+Usuario: `contador`
+Contraseña: `Contador123!`
 
-### Emisión electrónica real
-SUNAT publica servicios web de producción para el envío de comprobantes y servicios de consulta de validez/CDR. Para un sistema propio también deben implementarse el XML UBL, firma digital, reglas de validación, envío y procesamiento del CDR.
+## Qué se corrigió
+- El login ya no acepta cualquier contraseña.
+- El dashboard ya no intenta conectarse a `http://localhost:3000`.
+- La sesión se controla con `localStorage`.
+- Se agregó el SVG que faltaba.
+- Se agregó `index.html`; el archivo anterior `index(1).html` se conserva.
+- Empresas, clientes y ventas pueden registrar datos localmente.
+- El menú funciona en la versión web estática.
 
-El proyecto no contiene certificados ni credenciales reales. Deben configurarse en el servidor.
+## Uso
+Abre `index.html` o publícalo en un hosting estático.
 
-### Ejecutar
-cd backend
-npm install
-npm start
-
-Abrir http://localhost:3000
-
-### Producción
-Antes de usarlo con operaciones reales: incorporar base de datos PostgreSQL/MySQL, autenticación robusta, almacenamiento seguro de secretos, certificado digital, XML/firma, pruebas en beta y luego producción, logging, auditoría, backups y controles de acceso.
+## SUNAT
+El módulo visual queda preparado, pero el envío real de comprobantes requiere backend, credenciales autorizadas, certificado digital, XML UBL, firma, envío y procesamiento del CDR. No colocar credenciales reales en el frontend.

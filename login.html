@@ -1,1 +1,29 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ingresar | ContaPro</title><link rel="stylesheet" href="styles.css"></head><body class="login-page"><div class="login-box"><a class="brand" href="index.html"><img class="brand-svg" src="assets/contapro-logo.svg" alt="ContaPro"></a><h1>Bienvenido</h1><p>Ingresa al panel contable.</p><form id="loginForm"><label>Correo<input id="email" type="email" required placeholder="correo@empresa.com"></label><label>Contraseña<input type="password" required placeholder="••••••••"></label><button class="btn" type="submit">Ingresar</button></form><small>Demo: cualquier correo y contraseña son aceptados.</small><a href="index.html">← Volver al inicio</a></div><script>document.querySelector('#loginForm').addEventListener('submit',e=>{e.preventDefault();localStorage.setItem('contapro_user',document.querySelector('#email').value);location.href='dashboard.html'})</script></body></html>
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ingresar | ContaPro</title><link rel="stylesheet" href="styles.css"></head>
+<body class="login-page">
+<div class="login-box">
+<a class="brand" href="index.html"><img class="brand-svg" src="assets/contapro-logo.svg" alt="ContaPro"></a>
+<h1>Bienvenido</h1><p>Ingresa al panel contable.</p>
+<form id="loginForm">
+<label>Usuario<input id="email" type="text" required placeholder="admin"></label>
+<label>Contraseña<input id="password" type="password" required placeholder="••••••••"></label>
+<button class="btn" type="submit">Ingresar</button>
+</form>
+<small>Acceso de prueba: <b>admin</b> / <b>Admin123!</b></small>
+<p id="error" style="color:#b42318"></p>
+<a href="index.html">← Volver al inicio</a>
+</div>
+<script>
+document.querySelector('#loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u=document.querySelector('#email').value.trim();
+  const p=document.querySelector('#password').value;
+  if ((u==='admin' && p==='Admin123!') || (u==='contador' && p==='Contador123!')) {
+    localStorage.setItem('contapro_user',u);
+    localStorage.setItem('contapro_session','1');
+    location.href='dashboard.html';
+  } else document.querySelector('#error').textContent='Usuario o contraseña incorrectos.';
+});
+</script>
+</body></html>
