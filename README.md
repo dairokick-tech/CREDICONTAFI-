@@ -1,24 +1,27 @@
-# PAGÓYA — tienda online
-
-Versión corregida del frontend.
+# ContaPro — Plataforma contable + integración SUNAT
 
 ## Incluye
-- Logo personalizado.
-- Buscador funcional.
-- Categorías funcionales.
-- Ordenamiento por precio.
-- Carrito con cantidades y eliminación.
-- Inicio de sesión de demostración.
-- Registro de negocio de demostración.
-- Checkout con QR de pago proporcionado.
-- Diseño responsive para celular y PC.
+Frontend + backend Node.js + módulo SUNAT + SVG de marca.
 
-## Estructura
-- `index.html`
-- `assets/logo-pagoya.png`
-- `assets/qr-pago.png`
+### Integración preparada
+- Backend mantiene las credenciales fuera del navegador.
+- Endpoint para obtener token OAuth 2.0 del API SIRE cuando se configuren las credenciales autorizadas.
+- Endpoint de estado SUNAT.
+- Gestión básica de empresas, clientes, compras y ventas.
+- Comprobantes demo.
+- Estructura lista para persistencia.
 
-## Uso
-Abre `index.html` en un navegador.
+### Emisión electrónica real
+SUNAT publica servicios web de producción para el envío de comprobantes y servicios de consulta de validez/CDR. Para un sistema propio también deben implementarse el XML UBL, firma digital, reglas de validación, envío y procesamiento del CDR.
 
-**Nota:** el pago QR y las acciones de cuenta/registro funcionan como demostración frontend. Para pagos reales se requiere conectar un backend y una pasarela o integración autorizada.
+El proyecto no contiene certificados ni credenciales reales. Deben configurarse en el servidor.
+
+### Ejecutar
+cd backend
+npm install
+npm start
+
+Abrir http://localhost:3000
+
+### Producción
+Antes de usarlo con operaciones reales: incorporar base de datos PostgreSQL/MySQL, autenticación robusta, almacenamiento seguro de secretos, certificado digital, XML/firma, pruebas en beta y luego producción, logging, auditoría, backups y controles de acceso.
